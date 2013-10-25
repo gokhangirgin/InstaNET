@@ -62,7 +62,7 @@ namespace InstaNET
                 _geo = new Geographies(ref token);
             return _geo;
         } }
-
+        public TokenManager Token { get { return token; } }
         public void Dispose()
         {
             GC.SuppressFinalize(this);
