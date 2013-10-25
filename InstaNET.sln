@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstaNET", "InstaNET\InstaNET.csproj", "{DCEC90FE-7483-4B80-8942-E18892FC3FB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{7CAEC88A-6D2F-4D3A-B90D-DE66BACCBFB2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCEC90FE-7483-4B80-8942-E18892FC3FB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCEC90FE-7483-4B80-8942-E18892FC3FB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCEC90FE-7483-4B80-8942-E18892FC3FB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCEC90FE-7483-4B80-8942-E18892FC3FB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CAEC88A-6D2F-4D3A-B90D-DE66BACCBFB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CAEC88A-6D2F-4D3A-B90D-DE66BACCBFB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CAEC88A-6D2F-4D3A-B90D-DE66BACCBFB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CAEC88A-6D2F-4D3A-B90D-DE66BACCBFB2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

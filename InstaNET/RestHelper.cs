@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Linq;
 using System.Text;
 namespace InstaNET
 {
@@ -27,7 +25,6 @@ namespace InstaNET
                     {
                         request = (HttpWebRequest)WebRequest.Create(string.Format("{0}{1}{2}", baseURI, String.Join("/", paths), BuildQueryString(qstr, token, method)));
                         request.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
-                        request.Referer = "http://localhost:55882";
                         request.Method = Method.POST.ToString(); // without method here getting exception *Cannot send a content-body with this verb-type*
                         if (qstr != null)
                         {
