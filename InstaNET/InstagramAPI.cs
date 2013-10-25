@@ -19,11 +19,6 @@ namespace InstaNET
         private Geographies _geo;
         public InstagramAPI(TokenManager _token)
         {
-            //InstagramAPI api = new InstagramAPI(new TokenManager(_clientId: "a9beaa9c190649d18cdd99847d7261b8"));
-            //FeedResponse response = api.Users.SelfFeed();
-            //var usr = api.Users.Search("gokhan girgin", "10");
-            //var rs = api.Relationships.New("544232100",RelationShipAction.follow);
-            //var rs = api.Locations.Get("11");
             token = _token;
         }
 
