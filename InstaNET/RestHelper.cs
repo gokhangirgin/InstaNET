@@ -4,75 +4,48 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Linq;
 using System.Text;
 namespace InstaNET
 {
     public static class RestHelper
     {
-        public static IResponse<T> MakeAPIRequest<T>(this IResponse<T> str, string baseURI, string[] paths, Dictionary<string, string> qstr, TokenManager token, Method method, bool accessToken = false)
+        public static IResponse<T> MakeAPIRequest<T>(this IResponse<T> str, string baseURI, string[] paths, Dictionary<string, string> qstr, TokenManager token, Method method,bool accessToken = false)
         {
             if (accessToken && string.IsNullOrEmpty(token.accessToken))
                 throw new InvalidOperationException("This method requires access token!");
-            HttpWebRequest request;
-            HttpWebResponse response;
-            switch (method)
+            using (HttpClient client = new HttpClient { BaseAddress = new Uri(baseURI) })
             {
-                case Method.DELETE:
-                case Method.GET:
-                    request = (HttpWebRequest)WebRequest.Create(string.Format("{0}{1}{2}", baseURI, String.Join("/", paths), BuildQueryString(qstr, token)));
-                    break;
-                case Method.POST:
-                    {
-                        request = (HttpWebRequest)WebRequest.Create(string.Format("{0}{1}{2}", baseURI, String.Join("/", paths), BuildQueryString(qstr, token, method)));
-                        request.ContentType = "application/x-www-form-urlencoded;charset=UTF-8";
-                        request.Method = Method.POST.ToString(); // without method here getting exception *Cannot send a content-body with this verb-type*
-                        if (qstr != null)
-                        {
-                            StringBuilder sb = new StringBuilder();
-                            foreach (var item in qstr)
-                            {
-                                sb.AppendFormat("{0}={1}&", item.Key, item.Value);
-                            }
-                            sb = sb.Remove(sb.Length - 1, 1);//remove last &
-                            byte[] data = Encoding.UTF8.GetBytes(sb.ToString());
-                            request.ContentLength = data.Length;
-                            using (Stream sr = request.GetRequestStream())
-                            {
-                                sr.Write(data, 0, data.Length);
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    throw new NotSupportedException("method is not supported yet!.");
-            }
-            request.Method = method.ToString();
-            try
-            {
-                using (response = (HttpWebResponse)request.GetResponse())
-                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                try
                 {
-                    str = (IResponse<T>)JsonConvert.DeserializeObject(sr.ReadToEnd(), type: str.GetType(), settings: new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
-                    str.limit = new RateLimit { MaxLimit = Convert.ToInt32(response.Headers["X-Ratelimit-Limit"]), RemainingLimit = Convert.ToInt32(response.Headers["X-Ratelimit-Remaining"]) };
-                    if (response.StatusCode == HttpStatusCode.OK)
+                    HttpResponseMessage response;
+                    switch (method)
                     {
-                        if (str.meta.code != 200)
-                            throw new Exception(string.Format("Error Type: {0} ### Error Message : {1}", str.meta.error_type, str.meta.error_message));
-                        return str;
+                        case Method.DELETE: case Method.GET:
+                            response = client.GetAsync(string.Format("{0}{1}",String.Join("/", paths), BuildQueryString(qstr, token))).Result;
+                            break;
+                        case Method.POST:
+                            {
+                                HttpContent postData = null;
+                                response = client.PostAsync(string.Format("{0}{1}",String.Join("/", paths), BuildQueryString(qstr, token)), postData).Result;
+                            }
+                            break;
+                        default:
+                            throw new NotSupportedException("method is not supported yet!.");
                     }
-                    else
-                    {
-                        throw new Exception(string.Format("Error Type: {0} ### Error Message : {1}", str.meta.error_type, str.meta.error_message));
-                    }
+                    str = (IResponse<T>)JsonConvert.DeserializeObject(response.Content.ReadAsStringAsync().Result, type: str.GetType(), settings: new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+                    str.limit = new RateLimit { MaxLimit = Convert.ToInt32(response.Headers.GetValues("X-Ratelimit-Limit").FirstOrDefault()), RemainingLimit = Convert.ToInt32(response.Headers.GetValues("X-Ratelimit-Remaining").FirstOrDefault()) };
+                    return str;
                 }
-            }
-            catch (WebException ex)
-            {
-                using (Stream stream = ex.Response.GetResponseStream())
-                using (StreamReader sr = new StreamReader(stream))
+                catch (WebException ex)
                 {
-                    str = (IResponse<T>)JsonConvert.DeserializeObject(sr.ReadToEnd(), type: str.GetType(), settings: new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
-                    throw new WebException(string.Format("Error Type: {0} # Error Message : {1}", str.meta.error_type, str.meta.error_message));
+                    using (Stream stream = ex.Response.GetResponseStream())
+                    using (StreamReader sr = new StreamReader(stream))
+                    {
+                        str = (IResponse<T>)JsonConvert.DeserializeObject(sr.ReadToEnd(), type: str.GetType(), settings: new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+                        throw new WebException(string.Format("Error Type: {0} # Error Message : {1}", str.meta.error_type, str.meta.error_message));
+                    }
                 }
             }
         }
