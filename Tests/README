@@ -1,0 +1,4 @@
+Tests
+===
+
+Before you run tests you need to write an access token or client id to TestHelper.cs
